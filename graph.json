@@ -1,0 +1,24 @@
+{
+  "name": "Planner Cozy Menu",
+  "description": "Aplicación web de planificación de menú diario, semanal y mensual con recetas, lista de compras y filtrado interactivo por ingredientes y dificultad.",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "root",
+      "type": "repository",
+      "path": "/",
+      "children": ["graph.json", "planner-cozy-menu"]
+    },
+    {
+      "id": "app_folder",
+      "type": "folder",
+      "path": "/planner-cozy-menu",
+      "children": [
+        "index.html",
+        "styles.css",
+        "app.js",
+        "assets"
+      ]
+    }
+  ]
+}

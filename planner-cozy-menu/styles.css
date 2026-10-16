@@ -1,0 +1,93 @@
+/* Cozy Modern Styles & Custom Utility Classes */
+
+@layer utilities {
+  .nav-btn.active {
+    background-color: #D97757;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(217, 119, 87, 0.25);
+  }
+
+  .mode-tab.active {
+    background-color: #D97757;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(217, 119, 87, 0.2);
+  }
+
+  .cat-filter-btn.active {
+    background-color: #D97757;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(217, 119, 87, 0.2);
+  }
+
+  .diff-filter-btn.active {
+    background-color: #8F9E8B;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(143, 158, 139, 0.2);
+  }
+
+  .chip-ingredient.selected {
+    background-color: #D97757 !important;
+    color: #ffffff !important;
+    border-color: #B85536 !important;
+  }
+
+  /* Custom Scrollbar for cozy design */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #FFF7ED;
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #EAD7C5;
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #D97757;
+  }
+}
+
+/* Modal animation utilities */
+.modal-backdrop {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Printable Styles */
+@media print {
+  header, footer, #btn-back-to-builder, #btn-print-summary, #cookie-banner, .nav-btn {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  main {
+    max-w: 100% !important;
+    padding: 0 !important;
+  }
+
+  .grid {
+    display: block !important;
+  }
+
+  .bg-white, .bg-cozy-card, .bg-cozy-cream {
+    background: transparent !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    margin-bottom: 20px !important;
+  }
+}
