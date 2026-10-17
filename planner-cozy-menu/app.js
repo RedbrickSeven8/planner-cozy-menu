@@ -13,7 +13,7 @@ const DISHES_DATABASE = [
     prepTime: '20 min',
     servingsBase: 1,
     location: 'Colombia, Quindío',
-    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80',
+    image: 'assets/arepa-choclo-queso.jpg',
     description: 'Tradicional desayuno cafetero de Salento y Armenia. Masa tierna de maíz dulce, queso campesino fresco derretido y huevos pericos revueltos con tomate y cebolla larga.',
     ingredients: [
       { name: 'Maíz tierno (o harina para arepa de choclo)', quantity: 100, unit: 'g', category: 'Granos y Harinas' },
@@ -40,7 +40,7 @@ const DISHES_DATABASE = [
     prepTime: '65 min',
     servingsBase: 1,
     location: 'Colombia, Quindío',
-    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
+    image: 'assets/bandeja-paisa.jpg',
     description: 'El plato insignia de los arrieros quindianos. Frijoles cargamanto calados con guiso hogao, arroz blanco, carne molida sazonada, chicharrón crujiente, tajada de plátano maduro, huevo frito, arepa blanca y aguacate.',
     ingredients: [
       { name: 'Frijoles cargamanto', quantity: 120, unit: 'g', category: 'Legumbres' },
@@ -73,7 +73,7 @@ const DISHES_DATABASE = [
     prepTime: '75 min',
     servingsBase: 1,
     location: 'Colombia, Quindío',
-    image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80',
+    image: 'assets/sancocho.jpg',
     description: 'Sopa reconstituyente de las noches andinas en Quindío. Cocinado en leña con tres carnes (pollo de finca, res y cerdo), plátano verde, yuca harinosa, papa criolla, mazorca y cilantrillo de campo.',
     ingredients: [
       { name: 'Pollo / Gallina de finca', quantity: 100, unit: 'g', category: 'Carnes' },

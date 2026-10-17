@@ -7,7 +7,10 @@
       "id": "root",
       "type": "repository",
       "path": "/",
-      "children": ["graph.json", "planner-cozy-menu"]
+      "children": [
+        "graph.json",
+        "planner-cozy-menu"
+      ]
     },
     {
       "id": "app_folder",
@@ -17,7 +20,10 @@
         "index.html",
         "styles.css",
         "app.js",
-        "assets"
+        "assets",
+        "assets/arepa-choclo-queso.jpg",
+        "assets/bandeja-paisa.jpg",
+        "assets/sancocho.jpg"
       ]
     }
   ]
