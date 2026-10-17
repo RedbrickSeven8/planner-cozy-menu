@@ -109,10 +109,9 @@ const state = {
   filters: {
     category: 'all',
     difficulty: 'all',
-    selectedIngredients: new Set()
+    selectedIngredients: new Set(),
+    ingredientSearchQuery: ''
   },
-  // Menu slots mapping structure:
-  // { 'day-1-desayuno': dishId, 'day-1-almuerzo': dishId, ... }
   userMenu: {}
 };
 
@@ -232,12 +231,37 @@ function setupEventListeners() {
     });
   });
 
+  // Ingredient Search Input Handler
+  const searchInput = document.getElementById('input-search-ingredient');
+  const clearSearchBtn = document.getElementById('btn-clear-ingredient-search');
+
+  searchInput.addEventListener('input', (e) => {
+    state.filters.ingredientSearchQuery = e.target.value.trim().toLowerCase();
+    if (state.filters.ingredientSearchQuery.length > 0) {
+      clearSearchBtn.classList.remove('hidden');
+    } else {
+      clearSearchBtn.classList.add('hidden');
+    }
+    renderIngredientChips();
+  });
+
+  clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    state.filters.ingredientSearchQuery = '';
+    clearSearchBtn.classList.add('hidden');
+    renderIngredientChips();
+  });
+
   // Reset Filters Button
   document.getElementById('btn-reset-filters').addEventListener('click', () => {
     state.filters.category = 'all';
     state.filters.difficulty = 'all';
     state.filters.selectedIngredients.clear();
+    state.filters.ingredientSearchQuery = '';
     
+    searchInput.value = '';
+    clearSearchBtn.classList.add('hidden');
+
     document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.cat-filter-btn[data-cat="all"]').classList.add('active');
     
@@ -318,7 +342,7 @@ function switchView(viewName) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- INGREDIENT FILTERS (GRADUAL / INTERACTIVE SEARCH) ---
+// --- INGREDIENT FILTERS (WITH SEARCH BAR & TOP-PINNED SELECTED INGREDIENTS) ---
 function getAllUniqueIngredients() {
   const ingSet = new Set();
   DISHES_DATABASE.forEach(dish => {
@@ -332,45 +356,105 @@ function renderIngredientChips() {
   container.innerHTML = '';
 
   const allIngredients = getAllUniqueIngredients();
+  const query = state.filters.ingredientSearchQuery;
+
+  // Separate selected vs unselected
+  const selectedIngs = [];
+  const unselectedIngs = [];
 
   allIngredients.forEach(ingName => {
     const isSelected = state.filters.selectedIngredients.has(ingName);
-    const chip = document.createElement('button');
-    chip.className = `px-2.5 py-1 rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center gap-1 ${
-      isSelected 
-        ? 'bg-cozy-terracotta text-white border-cozy-terracottaDark shadow-sm' 
-        : 'bg-white text-cozy-warmText border-cozy-border hover:border-cozy-terracotta'
-    }`;
-    chip.innerHTML = `
-      <span>${ingName}</span>
-      ${isSelected ? '<i data-lucide="check" class="w-3 h-3 ml-0.5"></i>' : ''}
-    `;
+    const matchesQuery = query === '' || ingName.toLowerCase().includes(query);
 
-    chip.addEventListener('click', () => {
-      if (state.filters.selectedIngredients.has(ingName)) {
-        state.filters.selectedIngredients.delete(ingName);
-      } else {
-        state.filters.selectedIngredients.add(ingName);
-      }
-      renderIngredientChips();
-      renderCatalogDishes();
-    });
-
-    container.appendChild(chip);
+    if (isSelected) {
+      selectedIngs.push(ingName);
+    } else if (matchesQuery) {
+      unselectedIngs.push(ingName);
+    }
   });
 
+  // Render Selected Ingredients Section (TOP PINNED)
+  if (selectedIngs.length > 0) {
+    const selectedGroup = document.createElement('div');
+    selectedGroup.className = 'w-full pb-2 border-b border-cozy-border flex flex-wrap gap-1.5 items-center';
+    
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'w-full text-[10px] font-bold text-cozy-terracotta uppercase tracking-wider mb-1 block';
+    labelSpan.innerText = '✓ Ingredientes Seleccionados:';
+    selectedGroup.appendChild(labelSpan);
+
+    selectedIngs.forEach(ingName => {
+      const chip = createIngredientChip(ingName, true);
+      selectedGroup.appendChild(chip);
+    });
+
+    container.appendChild(selectedGroup);
+  }
+
+  // Render Unselected Available Ingredients Section
+  const availableGroup = document.createElement('div');
+  availableGroup.className = 'w-full flex flex-wrap gap-1.5 items-center pt-1';
+
+  if (selectedIngs.length > 0) {
+    const availLabel = document.createElement('span');
+    availLabel.className = 'w-full text-[10px] font-bold text-cozy-muted uppercase tracking-wider mb-1 block';
+    availLabel.innerText = query ? `Resultados para "${query}":` : 'Más ingredientes disponibles:';
+    availableGroup.appendChild(availLabel);
+  }
+
+  if (unselectedIngs.length === 0 && selectedIngs.length === 0) {
+    availableGroup.innerHTML = `
+      <p class="text-xs text-cozy-muted italic py-2 w-full text-center">No se encontraron ingredientes para "${query}"</p>
+    `;
+  } else {
+    unselectedIngs.forEach(ingName => {
+      const chip = createIngredientChip(ingName, false);
+      availableGroup.appendChild(chip);
+    });
+  }
+
+  container.appendChild(availableGroup);
+
+  // Update counter
   const countSpan = document.getElementById('active-ingredients-count');
   const count = state.filters.selectedIngredients.size;
   countSpan.innerText = `${count} seleccionado${count !== 1 ? 's' : ''}`;
 
+  // Reset button visibility check
   const resetBtn = document.getElementById('btn-reset-filters');
-  if (count > 0 || state.filters.category !== 'all' || state.filters.difficulty !== 'all') {
+  if (count > 0 || state.filters.category !== 'all' || state.filters.difficulty !== 'all' || query !== '') {
     resetBtn.classList.remove('hidden');
   } else {
     resetBtn.classList.add('hidden');
   }
 
   initLucideIcons();
+}
+
+function createIngredientChip(ingName, isSelected) {
+  const chip = document.createElement('button');
+  chip.className = `px-2.5 py-1 rounded-xl text-xs font-semibold border transition-all duration-150 flex items-center gap-1 ${
+    isSelected 
+      ? 'bg-cozy-terracotta text-white border-cozy-terracottaDark shadow-sm hover:bg-cozy-terracottaDark' 
+      : 'bg-white text-cozy-warmText border-cozy-border hover:border-cozy-terracotta'
+  }`;
+  
+  chip.innerHTML = `
+    <span>${ingName}</span>
+    ${isSelected ? '<i data-lucide="x" class="w-3 h-3 ml-0.5"></i>' : '<i data-lucide="plus" class="w-3 h-3 ml-0.5 opacity-60"></i>'}
+  `;
+
+  chip.addEventListener('click', () => {
+    if (isSelected) {
+      state.filters.selectedIngredients.delete(ingName);
+    } else {
+      state.filters.selectedIngredients.add(ingName);
+    }
+    renderIngredientChips();
+    renderCatalogDishes();
+  });
+
+  return chip;
 }
 
 // --- FILTERING LOGIC ---
@@ -705,7 +789,6 @@ function renderSummaryView() {
 
     dish.ingredients.forEach(ing => {
       const key = ing.name.toLowerCase();
-      // Multiply base quantity by number of servings
       const scaledQuantity = ing.quantity * state.servings;
 
       if (!ingredientsAggregated[key]) {

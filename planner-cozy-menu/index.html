@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sabor de Mi Tierra | Planificador de Menú Cozy</title>
   
-  <!-- Fonts: Fredoka & Plus Jakarta Sans / Quicksand -->
+  <!-- Fonts: Fredoka & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
   <!-- GSAP Animation Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
-  <!-- Tailwind CSS CDN (v3 style runtime or custom CSS tokens) -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -286,16 +286,25 @@
               </div>
             </div>
 
-            <!-- Interactive Ingredient Filter Chips -->
+            <!-- Interactive Ingredient Filter Chips with Search Bar -->
             <div>
               <div class="flex items-center justify-between mb-1.5">
                 <span class="text-xs font-semibold text-cozy-muted uppercase tracking-wider">Filtrar por Ingredientes</span>
                 <span id="active-ingredients-count" class="text-xs font-bold text-cozy-terracotta">0 seleccionados</span>
               </div>
-              <p class="text-xs text-cozy-muted mb-2">Al seleccionar varios ingredientes, se acota a los platos que contengan <strong>TODOS</strong> los elegidos (búsqueda interactiva gradual).</p>
+              <p class="text-xs text-cozy-muted mb-2">Busca y selecciona uno o varios ingredientes para acotar la búsqueda a platos con todos ellos.</p>
+
+              <!-- Search Input for Ingredients -->
+              <div class="relative mb-2">
+                <i data-lucide="search" class="w-4 h-4 text-cozy-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                <input id="input-search-ingredient" type="text" placeholder="Buscar ingrediente (ej. queso, plátano...)" class="w-full bg-cozy-cream border border-cozy-border rounded-xl pl-9 pr-8 py-2 text-xs font-medium text-cozy-warmText placeholder-cozy-muted focus:outline-none focus:ring-2 focus:ring-cozy-terracotta transition">
+                <button id="btn-clear-ingredient-search" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-cozy-muted hover:text-cozy-warmText p-1 rounded-full transition">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
               
-              <!-- Ingredients Available Chips Container -->
-              <div id="ingredients-chips-container" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-2 bg-cozy-cream rounded-2xl border border-cozy-border">
+              <!-- Ingredients Container (Selected at the top, followed by available) -->
+              <div id="ingredients-chips-container" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2 bg-cozy-cream rounded-2xl border border-cozy-border">
                 <!-- Dynamically populated ingredient chips -->
               </div>
             </div>
