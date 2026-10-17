@@ -7,7 +7,7 @@
 const DISHES_DATABASE = [
   {
     id: 'desayuno-arepa-queso-huevo',
-    name: 'Arepa de Choclo con Queso y Huevo Perico',
+    name: 'Arepa de Choclo',
     category: 'desayuno', // 'desayuno' | 'almuerzo' | 'comida'
     difficulty: 'fácil',   // 'fácil' | 'medio' | 'dificil' | 'profesional'
     prepTime: '20 min',
@@ -34,7 +34,7 @@ const DISHES_DATABASE = [
   },
   {
     id: 'almuerzo-bandeja-paisa-quindiana',
-    name: 'Bandeja Paisa Tradicional del Quindío',
+    name: 'Bandeja Paisa',
     category: 'almuerzo',
     difficulty: 'medio',
     prepTime: '65 min',
@@ -67,7 +67,7 @@ const DISHES_DATABASE = [
   },
   {
     id: 'comida-sancocho-trifasico-cafetero',
-    name: 'Sancocho Trifásico del Eje Cafetero',
+    name: 'Sancocho Trifásico',
     category: 'comida',
     difficulty: 'dificil',
     prepTime: '75 min',
