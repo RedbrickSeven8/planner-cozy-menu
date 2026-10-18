@@ -215,19 +215,22 @@
                 <button data-mode="mensual" class="mode-tab px-3.5 py-1.5 rounded-xl text-xs font-bold text-cozy-muted hover:text-cozy-warmText transition-all">Mensual (30 días)</button>
               </div>
 
-              <!-- Custom Days Counter (1 - 30 days) -->
-              <div id="custom-days-container" class="flex items-center bg-white border border-cozy-border rounded-2xl p-1 shadow-inner">
-                <button id="btn-days-minus" class="w-8 h-8 rounded-xl bg-cozy-cream hover:bg-cozy-border/50 text-cozy-warmText font-bold flex items-center justify-center transition">
+                            <!-- Custom Days Counter (1 - 30 days) -->
+              <div id="custom-days-container" class="flex items-center bg-white border border-cozy-border rounded-2xl p-1 shadow-inner relative">
+                <button id="btn-days-minus" type="button" class="w-8 h-8 rounded-xl bg-cozy-cream hover:bg-cozy-border/50 text-cozy-warmText font-bold flex items-center justify-center transition shrink-0">
                   <i data-lucide="minus" class="w-3.5 h-3.5"></i>
                 </button>
-                <div class="px-2 text-center">
-                  <span id="days-count" class="font-title font-bold text-base text-cozy-warmText">1</span>
-                  <span class="text-[10px] text-cozy-muted block font-semibold -mt-1">día(s)</span>
+                <div class="px-1.5 text-center flex flex-col items-center justify-center">
+                  <input id="input-days-count" type="number" min="1" max="30" value="1" class="w-12 text-center font-title font-bold text-base text-cozy-warmText bg-transparent focus:outline-none focus:ring-1 focus:ring-cozy-terracotta rounded-lg p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                  <span class="text-[10px] text-cozy-muted font-semibold -mt-1 block pointer-events-none">día(s)</span>
                 </div>
-                <button id="btn-days-plus" class="w-8 h-8 rounded-xl bg-cozy-cream hover:bg-cozy-border/50 text-cozy-warmText font-bold flex items-center justify-center transition">
+                <button id="btn-days-plus" type="button" class="w-8 h-8 rounded-xl bg-cozy-cream hover:bg-cozy-border/50 text-cozy-warmText font-bold flex items-center justify-center transition shrink-0">
                   <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
+              <p id="days-error-msg" class="hidden text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded-xl shadow-xs animate-shake">
+                ⚠️ El número de días debe estar entre 1 y 30.
+              </p>
             </div>
           </div>
 
