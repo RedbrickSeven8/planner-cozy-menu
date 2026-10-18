@@ -101,6 +101,7 @@ const DISHES_DATABASE = [
 const state = {
   currentView: 'builder', // 'builder' | 'summary'
   planMode: 'diario',      // 'diario' | 'semanal' | 'mensual'
+  planDays: 1,             // 1 to 30 days
   servings: 2,
   location: {
     country: 'Colombia',
@@ -145,6 +146,9 @@ function loadStoredPreferences() {
     const savedMode = localStorage.getItem('cozy_plan_mode');
     if (savedMode) state.planMode = savedMode;
 
+    const savedDays = localStorage.getItem('cozy_plan_days');
+    if (savedDays) state.planDays = parseInt(savedDays, 10) || 1;
+
     const savedLoc = localStorage.getItem('cozy_location');
     if (savedLoc) state.location = JSON.parse(savedLoc);
   } catch (e) {
@@ -157,6 +161,7 @@ function saveStateToStorage() {
     localStorage.setItem('cozy_user_menu', JSON.stringify(state.userMenu));
     localStorage.setItem('cozy_servings', state.servings);
     localStorage.setItem('cozy_plan_mode', state.planMode);
+    localStorage.setItem('cozy_plan_days', state.planDays);
     localStorage.setItem('cozy_location', JSON.stringify(state.location));
   } catch (e) {
     console.error('Error guardando en localStorage', e);
@@ -171,7 +176,7 @@ function setupEventListeners() {
   document.getElementById('btn-back-to-builder').addEventListener('click', () => switchView('builder'));
   document.getElementById('btn-go-to-summary').addEventListener('click', () => switchView('summary'));
 
-  // Plan Mode Switches (Diario, Semanal, Mensual)
+  // Plan Mode Switches (Diario / Custom, Semanal, Mensual)
   document.querySelectorAll('.mode-tab').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.mode-tab').forEach(b => {
@@ -180,9 +185,39 @@ function setupEventListeners() {
       });
       e.currentTarget.classList.add('active');
       state.planMode = e.currentTarget.dataset.mode;
+
+      if (state.planMode === 'semanal') {
+        state.planDays = 7;
+      } else if (state.planMode === 'mensual') {
+        state.planDays = 30;
+      }
+      updateDaysDisplay();
       saveStateToStorage();
       renderPlannerCanvas();
     });
+  });
+
+  // Custom Days Counter (1 to 30)
+  document.getElementById('btn-days-minus').addEventListener('click', () => {
+    if (state.planDays > 1) {
+      state.planDays--;
+      state.planMode = 'diario';
+      syncModeTabsUI();
+      updateDaysDisplay();
+      saveStateToStorage();
+      renderPlannerCanvas();
+    }
+  });
+
+  document.getElementById('btn-days-plus').addEventListener('click', () => {
+    if (state.planDays < 30) {
+      state.planDays++;
+      state.planMode = 'diario';
+      syncModeTabsUI();
+      updateDaysDisplay();
+      saveStateToStorage();
+      renderPlannerCanvas();
+    }
   });
 
   // Servings Counter
@@ -307,6 +342,25 @@ function setupEventListeners() {
   document.getElementById('btn-print-summary').addEventListener('click', () => {
     window.print();
   });
+
+  updateDaysDisplay();
+  syncModeTabsUI();
+}
+
+function updateDaysDisplay() {
+  document.getElementById('days-count').innerText = state.planDays;
+}
+
+function syncModeTabsUI() {
+  document.querySelectorAll('.mode-tab').forEach(b => {
+    if (b.dataset.mode === state.planMode) {
+      b.classList.add('active', 'bg-cozy-terracotta', 'text-white');
+      b.classList.remove('text-cozy-muted');
+    } else {
+      b.classList.remove('active', 'bg-cozy-terracotta', 'text-white');
+      b.classList.add('text-cozy-muted');
+    }
+  });
 }
 
 function updateServingsDisplay() {
@@ -342,7 +396,7 @@ function switchView(viewName) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- INGREDIENT FILTERS (WITH SEARCH BAR & TOP-PINNED SELECTED INGREDIENTS) ---
+// --- INGREDIENT FILTERS ---
 function getAllUniqueIngredients() {
   const ingSet = new Set();
   DISHES_DATABASE.forEach(dish => {
@@ -358,7 +412,6 @@ function renderIngredientChips() {
   const allIngredients = getAllUniqueIngredients();
   const query = state.filters.ingredientSearchQuery;
 
-  // Separate selected vs unselected
   const selectedIngs = [];
   const unselectedIngs = [];
 
@@ -373,7 +426,6 @@ function renderIngredientChips() {
     }
   });
 
-  // Render Selected Ingredients Section (TOP PINNED)
   if (selectedIngs.length > 0) {
     const selectedGroup = document.createElement('div');
     selectedGroup.className = 'w-full pb-2 border-b border-cozy-border flex flex-wrap gap-1.5 items-center';
@@ -391,7 +443,6 @@ function renderIngredientChips() {
     container.appendChild(selectedGroup);
   }
 
-  // Render Unselected Available Ingredients Section
   const availableGroup = document.createElement('div');
   availableGroup.className = 'w-full flex flex-wrap gap-1.5 items-center pt-1';
 
@@ -415,12 +466,10 @@ function renderIngredientChips() {
 
   container.appendChild(availableGroup);
 
-  // Update counter
   const countSpan = document.getElementById('active-ingredients-count');
   const count = state.filters.selectedIngredients.size;
   countSpan.innerText = `${count} seleccionado${count !== 1 ? 's' : ''}`;
 
-  // Reset button visibility check
   const resetBtn = document.getElementById('btn-reset-filters');
   if (count > 0 || state.filters.category !== 'all' || state.filters.difficulty !== 'all' || query !== '') {
     resetBtn.classList.remove('hidden');
@@ -460,17 +509,14 @@ function createIngredientChip(ingName, isSelected) {
 // --- FILTERING LOGIC ---
 function getFilteredDishes() {
   return DISHES_DATABASE.filter(dish => {
-    // 1. Category filter
     if (state.filters.category !== 'all' && dish.category !== state.filters.category) {
       return false;
     }
 
-    // 2. Difficulty filter
     if (state.filters.difficulty !== 'all' && dish.difficulty !== state.filters.difficulty) {
       return false;
     }
 
-    // 3. Gradual Ingredient Filtering (Must contain ALL selected ingredients)
     if (state.filters.selectedIngredients.size > 0) {
       const dishIngredientNames = dish.ingredients.map(i => i.name.toLowerCase());
       for (let reqIng of state.filters.selectedIngredients) {
@@ -507,7 +553,6 @@ function renderCatalogDishes() {
     const card = document.createElement('div');
     card.className = 'bg-cozy-card hover:bg-cozy-cardHover border border-cozy-border rounded-2xl p-4 transition-all duration-200 shadow-sm flex flex-col justify-between gap-3 group';
     
-    // Difficulty Badge Color
     let diffBadgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
     if (dish.difficulty === 'medio') diffBadgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
     if (dish.difficulty === 'dificil') diffBadgeClass = 'bg-orange-100 text-orange-800 border-orange-300';
@@ -554,29 +599,19 @@ function renderCatalogDishes() {
 
 // --- RENDER PLANNER CANVAS ---
 function getSlotsForMode() {
-  if (state.planMode === 'diario') {
-    return [
-      { id: 'day-1', label: 'Día Único' }
-    ];
-  } else if (state.planMode === 'semanal') {
-    return [
-      { id: 'day-1', label: 'Lunes' },
-      { id: 'day-2', label: 'Martes' },
-      { id: 'day-3', label: 'Miércoles' },
-      { id: 'day-4', label: 'Jueves' },
-      { id: 'day-5', label: 'Viernes' },
-      { id: 'day-6', label: 'Sábado' },
-      { id: 'day-7', label: 'Domingo' }
-    ];
-  } else {
-    // mensual
-    return [
-      { id: 'sem-1', label: 'Semana 1' },
-      { id: 'sem-2', label: 'Semana 2' },
-      { id: 'sem-3', label: 'Semana 3' },
-      { id: 'sem-4', label: 'Semana 4' }
-    ];
+  const slots = [];
+  const weekDaysEs = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+  for (let i = 1; i <= state.planDays; i++) {
+    const dayLabel = state.planDays === 1 
+      ? 'Día Único' 
+      : (state.planDays <= 7 
+          ? `Día ${i} (${weekDaysEs[(i - 1) % 7]})` 
+          : `Día ${i}`);
+    slots.push({ id: `day-${i}`, label: dayLabel });
   }
+
+  return slots;
 }
 
 function renderPlannerCanvas() {
@@ -591,8 +626,7 @@ function renderPlannerCanvas() {
   ];
 
   // Update Status Banner
-  const modeLabels = { diario: 'Plan Diario', semanal: 'Plan Semanal (7 días)', mensual: 'Plan Mensual (4 semanas)' };
-  document.getElementById('planner-status-text').innerText = `${modeLabels[state.planMode]} activo`;
+  document.getElementById('planner-status-text').innerText = `Plan de ${state.planDays} día${state.planDays !== 1 ? 's' : ''} activo`;
 
   slots.forEach(slot => {
     const dayBox = document.createElement('div');
@@ -660,7 +694,6 @@ function addDishToAnySlot(dishId, mealCategory) {
   const slots = getSlotsForMode();
   let assigned = false;
 
-  // Find first empty slot for this meal category
   for (let slot of slots) {
     const slotKey = `${slot.id}-${mealCategory}`;
     if (!state.userMenu[slotKey]) {
@@ -670,7 +703,6 @@ function addDishToAnySlot(dishId, mealCategory) {
     }
   }
 
-  // If no empty slot, assign to first slot anyway
   if (!assigned) {
     const firstSlotKey = `${slots[0].id}-${mealCategory}`;
     state.userMenu[firstSlotKey] = dishId;
@@ -722,7 +754,6 @@ function openRecipeModal(dishId) {
   document.getElementById('modal-recipe-origin').innerText = dish.location;
   document.getElementById('modal-recipe-desc').innerText = dish.description;
 
-  // Ingredients List
   const ingList = document.getElementById('modal-recipe-ingredients');
   ingList.innerHTML = dish.ingredients.map(ing => `
     <li class="flex items-center gap-2 p-2 bg-white rounded-xl border border-cozy-border">
@@ -732,7 +763,6 @@ function openRecipeModal(dishId) {
     </li>
   `).join('');
 
-  // Steps
   const stepsList = document.getElementById('modal-recipe-steps');
   stepsList.innerHTML = dish.steps.map(step => `
     <li class="p-2.5 bg-white rounded-xl border border-cozy-border text-cozy-warmText leading-relaxed">
@@ -740,7 +770,6 @@ function openRecipeModal(dishId) {
     </li>
   `).join('');
 
-  // Modal Add button action
   const addBtn = document.getElementById('btn-modal-add-to-menu');
   addBtn.onclick = () => {
     addDishToAnySlot(dish.id, dish.category);
@@ -819,7 +848,6 @@ function renderSummaryView() {
       </div>
     `;
   } else {
-    // Group ingredients by category
     const grouped = {};
     Object.values(ingredientsAggregated).forEach(item => {
       if (!grouped[item.category]) grouped[item.category] = [];
